@@ -19,7 +19,12 @@ struct Expression {
   /**
    * @todo(cscd70) Please complete the comparator.
    */
-  bool operator==(const Expression &Expr) const { return false; }
+  bool operator==(const Expression &Expr) const { 
+    bool rb,lb;
+    rb=this->RHS.getSExtValue()==Expr->RHS.getSExtValue;
+    lb=this->LHS.getSExtValue()==Expr->LHS.getSExtValue
+    return rb&&lb; 
+  }
 };
 
 inline raw_ostream &operator<<(raw_ostream &Outs, const Expression &Expr) {

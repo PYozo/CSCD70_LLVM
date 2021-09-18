@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
-
+#include<algorithm>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/Function.h>
@@ -140,6 +140,12 @@ protected:
     return meet(MeetOperands);
   }
 
+  unsigned int position(const TDomainElem elem)
+  {
+    unsigned int result=0;
+    
+  }
+
 private:
   /**
    * @todo(cscd70) Please provide an instantiation for the backward pass.
@@ -150,7 +156,7 @@ private:
     /**
      * @todo(cscd70) Please complete the definition of this method.
      */
-
+    Operands=predecessors(&BB);
     return Operands;
   }
   /**
@@ -164,8 +170,11 @@ private:
     /**
      * @todo(cscd70) Please complete the defintion of this method.
      */
-
-    return DomainVal_t(Domain.size());
+    DomainVal_t result(Domain.size(),true);
+    for(const BasicBlock* bb:MeetOperands){
+        result&=InstDomainValMap.at(&bb->back());
+    }
+    return result;
   }
   /*****************************************************************************
    * Transfer Function
@@ -223,7 +232,24 @@ private:
    *
    * @todo(cscd70) Please implement this method.
    */
-  bool traverseCFG(const Function &F) { return false; }
+  bool traverseCFG(const Function &F) { 
+    bool changed=false;
+    for(auto &bb:F){
+      DomainVal_t dovar;
+      if(getMeetOperands(bb)){
+        dovar=meet(getMeetOperands(bb));
+      }else{
+        dovar=bc();
+      }
+      DomainVal_t inputvar=dovar;
+      for(auto &inst:bb){
+        changed|=transferFunc(inst,inputvar,InstDomainValMap.at(&inst));
+        inputvar=InstDomainValMap.at(&inst);
+      }
+    }
+    return changed; 
+  }
+
   /*****************************************************************************
    * Domain Initialization
    *****************************************************************************/
